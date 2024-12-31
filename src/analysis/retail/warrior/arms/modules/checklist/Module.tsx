@@ -11,6 +11,7 @@ import MortalStrike from '../core/Execute/MortalStrike';
 import SweepingStrikes from '../core/SweepingStrikes';
 import AlwaysBeCasting from '../features/AlwaysBeCasting';
 import Component from './Component';
+import { check, executeAPL } from '../core/Execute/ExecuteAplCheck';
 
 class Checklist extends BaseChecklist {
   static dependencies = {
@@ -37,10 +38,15 @@ class Checklist extends BaseChecklist {
 
   render() {
     const checkResults = aplCheck(this.owner.eventHistory, this.owner.info);
+    // const executeCheckResults = check(this.owner.eventHistory, this.owner.info);
+    // console.log(checkResults)
+    // console.log(executeCheckResults)
     return (
       <Component
         apl={apl}
+        // executeAPL={executeAPL}
         checkResults={checkResults}
+        // executeCheckResults={executeCheckResults}
         combatant={this.combatants.selected}
         castEfficiency={this.castEfficiency}
         thresholds={{

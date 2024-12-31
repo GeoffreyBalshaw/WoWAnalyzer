@@ -6,61 +6,103 @@ import aplCheck, { build } from 'parser/shared/metrics/apl';
 import annotateTimeline from 'parser/shared/metrics/apl/annotate';
 import * as cnd from 'parser/shared/metrics/apl/conditions';
 
+const JUGGERNAUT_DURATION = 12000;
+const MASSACE_EXECUTE_THRESHOLD = 0.35;
+
+// tmy https://www.warcraftlogs.com/reports/Lna7ANqKFbBWkD2Q?fight=20&type=casts&source=376
+// bris https://www.warcraftlogs.com/reports/1R9TkvMF7HLPpVdm?fight=19&type=damage-done&source=43
+// nezy (opp) https://www.warcraftlogs.com/reports/y9gBTjamNH84vGMZ?fight=26&type=damage-done&source=2
 export const apl = build([
-  //2 Overpower Charges
+
+  // TODO lots of this assumes Opp, which may not be true
+  // Exe with 3x MFE, 2x SD, refresh Jugg
+  {
+    spell: SPELLS.EXECUTE_GLYPHED,
+    condition: cnd.and(
+      cnd.not(cnd.buffPresent(SPELLS.BLADESTORM)),// don't get mad about the MS procs from Unhinged
+      // the grammar this outputs is a little funky
+      // "... and don't Bladestorm is present"
+      cnd.or(
+        // cnd.buffStacks(SPELLS.MARKED_FOR_EXECUTION, { atLeast: 3, atMost: 3 }),
+        cnd.debuffStacks(SPELLS.MARKED_FOR_EXECUTION, { atLeast: 3, atMost: 3 }),
+        cnd.buffStacks(SPELLS.SUDDEN_DEATH_ARMS_TALENT_BUFF, { atLeast: 2, atMost: 2 }),
+        cnd.and(
+          cnd.buffRemaining(SPELLS.JUGGERNAUT, JUGGERNAUT_DURATION, { atMost: 6000 }),
+          cnd.spellAvailable(SPELLS.EXECUTE_GLYPHED) // just checks for CD, not actually usable
+          // TODO figure out how to fix that
+        )
+      )
+    )
+  },
+
+  // OP with opp outside execute
   {
     spell: SPELLS.OVERPOWER,
-    condition: cnd.spellCharges(SPELLS.OVERPOWER, { atLeast: 2, atMost: 2 }),
+    condition:
+      cnd.and(
+        cnd.buffPresent(SPELLS.OPPORTUNIST, 500),
+        cnd.not(cnd.buffPresent(SPELLS.BLADESTORM)), // don't get mad about the MS procs from Unhinged
+        // the grammar this outputs is a little funky
+        // "... and don't Bladestorm is present"
+        cnd.not(cnd.inExecute(MASSACE_EXECUTE_THRESHOLD))
+      )
   },
-  //Mortal Strike Conditions:
-  // Execute: Deep Wounds < 1 GCD || Enduring Blow || (2 Overpower Stacks && 2 Exploiter Stacks) || Battlelord Buff
-  // Non-Execute: Enduring BLow || 2 Overpower Stacks || Battlelord
+
+  // MS outside execute
   {
     spell: SPELLS.MORTAL_STRIKE,
-    condition: cnd.hasTalent(TALENTS.BATTLELORD_TALENT),
-  },
-  {
-    spell: SPELLS.MORTAL_STRIKE,
-    condition: cnd.and(
-      cnd.buffStacks(SPELLS.OVERPOWER, { atLeast: 2 }),
-      cnd.buffStacks(TALENTS.EXECUTIONERS_PRECISION_TALENT, { atLeast: 2 }),
-      cnd.inExecute(),
+    condition: cnd.not(
+      cnd.inExecute(MASSACE_EXECUTE_THRESHOLD)
     ),
   },
-  {
-    spell: SPELLS.MORTAL_STRIKE,
-    condition: cnd.and(cnd.buffStacks(SPELLS.OVERPOWER, { atLeast: 2 }), cnd.not(cnd.inExecute())),
-  },
-  // Execute /w Sudden Death
-  { spell: SPELLS.EXECUTE, condition: cnd.buffPresent(SPELLS.SUDDEN_DEATH_ARMS_TALENT_BUFF) },
-  // Skull Splitter No Execute: <55 rage and no sudden death
+
+  // SkS inside execute
   {
     spell: TALENTS.SKULLSPLITTER_TALENT,
     condition: cnd.and(
-      cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 55 }),
-      cnd.not(cnd.inExecute()),
+      cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 850 }), // TODO rage values are scaled by 10
+      // which I _think_ makes the logic correct,
+      // but makes it display oddly
+      // "...when you have at most 850 Rage"
+      cnd.inExecute(MASSACE_EXECUTE_THRESHOLD)
     ),
   },
-  // Skull Splitter Execute: <45 rage
+
+  // MS inside execute
+  {
+    spell: SPELLS.MORTAL_STRIKE,
+    condition: cnd.and(
+      cnd.debuffStacks(SPELLS.EXECUTIONERS_PRECISION_DEBUFF, { atLeast: 2 }),
+      cnd.buffStacks(SPELLS.LETHAL_BLOWS_BUFF, { atLeast: 2 }),
+      cnd.inExecute(MASSACE_EXECUTE_THRESHOLD)
+    ),
+  },
+
+  // SkS outside execute
   {
     spell: TALENTS.SKULLSPLITTER_TALENT,
-    condition: cnd.and(cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 45 }), cnd.inExecute()),
+    condition: cnd.not(
+      cnd.inExecute(MASSACE_EXECUTE_THRESHOLD)
+    ),
   },
+
+  // OP inside execute with Opp && rage below 80 && under 2 MP
+  {
+    spell: SPELLS.OVERPOWER,
+    condition: cnd.and(
+      cnd.buffPresent(SPELLS.OPPORTUNIST, 500),
+      cnd.buffStacks(TALENTS.OVERPOWER_TALENT, { atMost: 1 }), // Martial Prowess buff
+      cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 800 }),
+      cnd.inExecute(MASSACE_EXECUTE_THRESHOLD)
+    ),
+  },
+
+  // TODO fallthrough execute
+  // OP
   SPELLS.OVERPOWER,
-  SPELLS.MORTAL_STRIKE,
-  { spell: SPELLS.WHIRLWIND, condition: cnd.hasTalent(TALENTS.FERVOR_OF_BATTLE_TALENT) },
-  { spell: SPELLS.EXECUTE, condition: cnd.inExecute() },
-  //not fervor + (rage > 50 / cs debuff / not eb lego)
-  // this might be a bit much
-  //SPELLS.SLAM,
-  { spell: SPELLS.SLAM, condition: cnd.not(cnd.hasTalent(TALENTS.FERVOR_OF_BATTLE_TALENT)) },
-  /* {
-    spell: SPELLS.SLAM,
-    condition: cnd.and(
-      cnd.hasNoTalent(SPELLS.FERVOR_OF_BATTLE_TALENT),
-      cnd.or(cnd.hasResource(RESOURCE_TYPES.RAGE, { atLeast: 50 }), cnd.hasNoLegendary(SPELLS.ENDURING_BLOW)),
-    ),
-  }, */
+
+  // Slam
+  SPELLS.SLAM
 ]);
 
 export const check = aplCheck(apl);

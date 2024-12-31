@@ -11,6 +11,7 @@ import {
 import GenericCastEfficiencyRequirement from 'parser/shared/modules/features/Checklist/GenericCastEfficiencyRequirement';
 import Requirement from 'parser/shared/modules/features/Checklist/Requirement';
 import Rule from 'parser/shared/modules/features/Checklist/Rule';
+import { executeAPL } from '../core/Execute/ExecuteAplCheck';
 
 const ArmsWarriorChecklist = ({
   combatant,
@@ -18,14 +19,16 @@ const ArmsWarriorChecklist = ({
   thresholds,
   apl,
   checkResults,
-}: ChecklistProps & AplRuleProps) => {
+  // executeAPL,
+  // executeCheckResults
+}: any) => {
   const AbilityRequirement = (props: AbilityRequirementProps) => (
     <GenericCastEfficiencyRequirement
       castEfficiency={castEfficiency.getCastEfficiencyForSpellId(props.spell)}
       {...props}
     />
   );
-
+console.log(apl)
   return (
     <Checklist>
       <AplRule
@@ -33,18 +36,36 @@ const ArmsWarriorChecklist = ({
         checkResults={checkResults}
         castEfficiency={castEfficiency}
         name="Rotation Efficiency"
-        cooldowns={[SPELLS.COLOSSUS_SMASH, TALENTS.WARBREAKER_TALENT, TALENTS.AVATAR_SHARED_TALENT]}
+        cooldowns={[SPELLS.COLOSSUS_SMASH, TALENTS.WARBREAKER_TALENT, TALENTS.AVATAR_SHARED_TALENT, TALENTS.THUNDEROUS_ROAR_TALENT, SPELLS.BLADESTORM]}
         description={
           <div style={{ color: 'white' }}>
             Warrior has a simple rotation. That does not mean the class is trivial to play. Small
             mistakes will compound themselves and result in a large final DPS loss. Use the graphic
             below to see if you are making small rotational mistakes.
+            <br />
             <strong> NOTE:</strong> The priority list below does not include{' '}
             <SpellLink spell={TALENTS.REND_ARMS_TALENT} icon />
             <br />
           </div>
         }
       />
+      {/* <AplRule
+        apl={executeAPL}
+        checkResults={executeCheckResults}
+        castEfficiency={castEfficiency}
+        name="Execute Rotation Efficiency"
+        cooldowns={[SPELLS.COLOSSUS_SMASH, TALENTS.WARBREAKER_TALENT, TALENTS.AVATAR_SHARED_TALENT, TALENTS.THUNDEROUS_ROAR_TALENT]}
+        description={
+          <div style={{ color: 'white' }}>
+            Arms Warrior has a slightly different rotation within execute range. Use the graphic
+            below to see if you are making small rotational mistakes.
+            <br />
+            <strong> NOTE:</strong> The priority list below does not include{' '}
+            <SpellLink spell={TALENTS.REND_ARMS_TALENT} icon />
+            <br />
+          </div>
+        }
+      /> */}
       {!false && (
         <Rule
           name={
