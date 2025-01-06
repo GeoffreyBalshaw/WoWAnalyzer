@@ -35,7 +35,7 @@ export const apl = (executeThreshold: number): Apl => {
         cnd.or(
           cnd.debuffStacks(SPELLS.MARKED_FOR_EXECUTION, { atLeast: 3, atMost: 3 }),
           cnd.buffStacks(SPELLS.SUDDEN_DEATH_ARMS_TALENT_BUFF, { atLeast: 2, atMost: 2 }),
-          cnd.buffRemaining(SPELLS.JUGGERNAUT, JUGGERNAUT_DURATION, { atMost: 1000 }),
+          cnd.buffRemaining(SPELLS.JUGGERNAUT, JUGGERNAUT_DURATION, { atMost: 3000 }),
         ),
       ),
       description: (
@@ -62,7 +62,7 @@ export const apl = (executeThreshold: number): Apl => {
       spell: TALENTS.SKULLSPLITTER_TALENT,
       condition: cnd.optionalRule(
         cnd.and(
-          cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 850 }),
+          cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 850 }), // rage is logged 10x higher than the player's "real" value
           cnd.inExecute(executeThreshold),
           notBladestorming,
         ),
@@ -70,8 +70,8 @@ export const apl = (executeThreshold: number): Apl => {
       description: (
         <>
           (Optional) Cast <SpellLink spell={TALENTS.SKULLSPLITTER_TALENT} /> while below 85 rage and
-          in execute range. You can gamble on getting enough rage from other sources, but this is
-          most correct on average.
+          in execute range. You can gamble on getting enough rage from other sources, but on average
+          it's best to avoid that.
         </>
       ),
     },
@@ -147,6 +147,7 @@ export const apl = (executeThreshold: number): Apl => {
       ),
     },
 
+    // Exe in execute
     {
       spell: SPELLS.EXECUTE_GLYPHED,
       condition: cnd.and(executeUsable, cnd.inExecute(executeThreshold), notBladestorming),
@@ -157,7 +158,7 @@ export const apl = (executeThreshold: number): Apl => {
       ),
     },
 
-    // OP with opp outside execute
+    // OP with FF outside execute
     {
       spell: SPELLS.OVERPOWER,
       condition: cnd.and(
@@ -173,11 +174,11 @@ export const apl = (executeThreshold: number): Apl => {
       ),
     },
 
-    // OP with FF outside execute
+    // OP with Opp outside execute
     {
       spell: SPELLS.OVERPOWER,
       condition: cnd.and(
-        cnd.buffPresent(SPELLS.OPPORTUNIST, 500),
+        cnd.buffPresent(SPELLS.OPPORTUNIST),
         notBladestorming,
         cnd.not(cnd.inExecute(executeThreshold)),
       ),
@@ -246,7 +247,6 @@ export const apl = (executeThreshold: number): Apl => {
   ]);
 };
 
-// export const check = aplCheck(apl);
 export const check = (events: AnyEvent[], info: PlayerInfo): CheckResult => {
   const executeThreshold = info.combatant.hasTalent(TALENTS.MASSACRE_SPEC_TALENT) ? 0.35 : 0.2;
   const check = aplCheck(apl(executeThreshold));

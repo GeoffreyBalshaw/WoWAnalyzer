@@ -2,9 +2,12 @@ import SPELLS from 'common/SPELLS';
 import TALENTS from 'common/TALENTS/warrior';
 import { SpellLink } from 'interface';
 import PreparationRule from 'parser/retail/modules/features/Checklist/PreparationRule';
-import AplRule from 'parser/shared/metrics/apl/ChecklistRule';
+import AplRule, { AplRuleProps } from 'parser/shared/metrics/apl/ChecklistRule';
 import Checklist from 'parser/shared/modules/features/Checklist';
-import { AbilityRequirementProps } from 'parser/shared/modules/features/Checklist/ChecklistTypes';
+import {
+  AbilityRequirementProps,
+  ChecklistProps,
+} from 'parser/shared/modules/features/Checklist/ChecklistTypes';
 import GenericCastEfficiencyRequirement from 'parser/shared/modules/features/Checklist/GenericCastEfficiencyRequirement';
 import Requirement from 'parser/shared/modules/features/Checklist/Requirement';
 import Rule from 'parser/shared/modules/features/Checklist/Rule';
@@ -15,7 +18,7 @@ const ArmsWarriorChecklist = ({
   thresholds,
   apl,
   checkResults,
-}: any) => {
+}: ChecklistProps & AplRuleProps) => {
   const AbilityRequirement = (props: AbilityRequirementProps) => (
     <GenericCastEfficiencyRequirement
       castEfficiency={castEfficiency.getCastEfficiencyForSpellId(props.spell)}
