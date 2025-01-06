@@ -2,16 +2,12 @@ import SPELLS from 'common/SPELLS';
 import TALENTS from 'common/TALENTS/warrior';
 import { SpellLink } from 'interface';
 import PreparationRule from 'parser/retail/modules/features/Checklist/PreparationRule';
-import AplRule, { AplRuleProps } from 'parser/shared/metrics/apl/ChecklistRule';
+import AplRule from 'parser/shared/metrics/apl/ChecklistRule';
 import Checklist from 'parser/shared/modules/features/Checklist';
-import {
-  AbilityRequirementProps,
-  ChecklistProps,
-} from 'parser/shared/modules/features/Checklist/ChecklistTypes';
+import { AbilityRequirementProps } from 'parser/shared/modules/features/Checklist/ChecklistTypes';
 import GenericCastEfficiencyRequirement from 'parser/shared/modules/features/Checklist/GenericCastEfficiencyRequirement';
 import Requirement from 'parser/shared/modules/features/Checklist/Requirement';
 import Rule from 'parser/shared/modules/features/Checklist/Rule';
-import { executeAPL } from '../core/Execute/ExecuteAplCheck';
 
 const ArmsWarriorChecklist = ({
   combatant,
@@ -19,8 +15,6 @@ const ArmsWarriorChecklist = ({
   thresholds,
   apl,
   checkResults,
-  // executeAPL,
-  // executeCheckResults
 }: any) => {
   const AbilityRequirement = (props: AbilityRequirementProps) => (
     <GenericCastEfficiencyRequirement
@@ -28,7 +22,6 @@ const ArmsWarriorChecklist = ({
       {...props}
     />
   );
-console.log(apl)
   return (
     <Checklist>
       <AplRule
@@ -36,7 +29,13 @@ console.log(apl)
         checkResults={checkResults}
         castEfficiency={castEfficiency}
         name="Rotation Efficiency"
-        cooldowns={[SPELLS.COLOSSUS_SMASH, TALENTS.WARBREAKER_TALENT, TALENTS.AVATAR_SHARED_TALENT, TALENTS.THUNDEROUS_ROAR_TALENT, SPELLS.BLADESTORM]}
+        cooldowns={[
+          SPELLS.COLOSSUS_SMASH,
+          TALENTS.WARBREAKER_TALENT,
+          TALENTS.AVATAR_SHARED_TALENT,
+          TALENTS.THUNDEROUS_ROAR_TALENT,
+          SPELLS.BLADESTORM,
+        ]}
         description={
           <div style={{ color: 'white' }}>
             Warrior has a simple rotation. That does not mean the class is trivial to play. Small
@@ -49,23 +48,6 @@ console.log(apl)
           </div>
         }
       />
-      {/* <AplRule
-        apl={executeAPL}
-        checkResults={executeCheckResults}
-        castEfficiency={castEfficiency}
-        name="Execute Rotation Efficiency"
-        cooldowns={[SPELLS.COLOSSUS_SMASH, TALENTS.WARBREAKER_TALENT, TALENTS.AVATAR_SHARED_TALENT, TALENTS.THUNDEROUS_ROAR_TALENT]}
-        description={
-          <div style={{ color: 'white' }}>
-            Arms Warrior has a slightly different rotation within execute range. Use the graphic
-            below to see if you are making small rotational mistakes.
-            <br />
-            <strong> NOTE:</strong> The priority list below does not include{' '}
-            <SpellLink spell={TALENTS.REND_ARMS_TALENT} icon />
-            <br />
-          </div>
-        }
-      /> */}
       {!false && (
         <Rule
           name={

@@ -381,8 +381,13 @@ const spells = {
   // Arm Talents
   EXECUTIONERS_PRECISION_DEBUFF: {
     id: 386633, // ID for the debuff is different from the talent
-    name: 'Executioner\'s Precision',
+    name: "Executioner's Precision",
     icon: 'inv_sword_48',
+  },
+  FIERCE_FOLLOWTHROUGH_BUFF: {
+    id: 458689,
+    name: 'Fierce Followthrough',
+    icon: 'spell_deathknight_butcher2',
   },
   IN_FOR_THE_KILL_TALENT_BUFF: {
     id: 248622,
