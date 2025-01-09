@@ -254,6 +254,11 @@ class CastEfficiency extends Analyzer {
     includeNoCooldownEfficiency = false,
   ): AbilityCastEfficiency | null {
     const ability = this.abilities.getAbility(spellId);
+    if (spellId === 436358) {
+      console.log('here');
+      console.log(ability);
+      // this.getCastEfficiencyForAbility(ability, includeNoCooldownEfficiency)
+    }
     return ability ? this.getCastEfficiencyForAbility(ability, includeNoCooldownEfficiency) : null;
   }
 

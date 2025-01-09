@@ -4,19 +4,37 @@ import RESOURCE_TYPES from 'game/RESOURCE_TYPES';
 import SpellLink from 'interface/SpellLink';
 import { suggestion } from 'parser/core/Analyzer';
 import { AnyEvent } from 'parser/core/Events';
-import aplCheck, { Apl, build, CheckResult, PlayerInfo } from 'parser/shared/metrics/apl';
+import aplCheck, {
+  Apl,
+  build,
+  CheckResult,
+  Condition,
+  PlayerInfo,
+} from 'parser/shared/metrics/apl';
 import annotateTimeline from 'parser/shared/metrics/apl/annotate';
 import * as cnd from 'parser/shared/metrics/apl/conditions';
 
 const JUGGERNAUT_DURATION = 12000;
+const MASSACRE_EXECUTE_THRESHOLD = 0.35;
+const DEFAULT_EXECUTE_THRESHOLD = 0.2;
+
+// TODO add spells for non-massacre execute?
 
 // tmy https://www.warcraftlogs.com/reports/Lna7ANqKFbBWkD2Q?fight=20&type=casts&source=376
 // bris https://www.warcraftlogs.com/reports/1R9TkvMF7HLPpVdm?fight=19&type=damage-done&source=43
 // nezy (opp) https://www.warcraftlogs.com/reports/y9gBTjamNH84vGMZ?fight=26&type=damage-done&source=2
+// walhe (col) https://www.warcraftlogs.com/reports/Ft8NByGLZ64AMX2f?fight=14&type=summary&source=12
 
-const notBladestorming = cnd.not(cnd.buffPresent(SPELLS.BLADESTORM)); // don't get mad about the MS procs from Unhinged
+// don't get mad about the MS procs from Unhinged
+const notBladestorming = cnd.not(cnd.buffPresent(SPELLS.BLADESTORM));
+// TODO add normalizer for ravager
+// use an EventLinkNormalizer to connect damage events to cast events
+// use a custom Normalizer to detect all damage events within Xms (3ms? 5ms?) of the ravager damage and convert the linked cast events to freecast events
 
-export const apl = (executeThreshold: number): Apl => {
+export const apl = (info: PlayerInfo): Apl => {
+  const executeThreshold = info.combatant.hasTalent(TALENTS.MASSACRE_SPEC_TALENT)
+    ? MASSACRE_EXECUTE_THRESHOLD
+    : DEFAULT_EXECUTE_THRESHOLD;
   const executeUsable = cnd.or(
     cnd.buffPresent(SPELLS.SUDDEN_DEATH_ARMS_TALENT_BUFF),
     cnd.and(
@@ -25,6 +43,12 @@ export const apl = (executeThreshold: number): Apl => {
     ),
   );
 
+  return info.combatant.hasTalent(TALENTS.SLAYERS_DOMINANCE_TALENT)
+    ? buildSlayerApl(executeThreshold, executeUsable)
+    : buildColossusApl(executeThreshold, executeUsable);
+};
+
+export const buildSlayerApl = (executeThreshold: number, executeUsable: Condition<any>): Apl => {
   return build([
     // Exe with 3x MFE, 2x SD, refresh Jugg
     {
@@ -247,9 +271,208 @@ export const apl = (executeThreshold: number): Apl => {
   ]);
 };
 
+export const buildColossusApl = (executeThreshold: number, executeUsable: Condition<any>): Apl => {
+  return build([
+    // SkS in exe below 85
+    {
+      spell: TALENTS.SKULLSPLITTER_TALENT,
+      condition: cnd.optionalRule(
+        cnd.and(
+          cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 850 }), // rage is logged 10x higher than the player's "real" value
+          cnd.inExecute(executeThreshold),
+          notBladestorming,
+        ),
+      ),
+      description: (
+        <>
+          (Optional) Cast <SpellLink spell={TALENTS.SKULLSPLITTER_TALENT} /> while below 85 rage and
+          in execute range. You can gamble on getting enough rage from other sources, but on average
+          it's best to avoid that.
+        </>
+      ),
+    },
+    // demolish in exe with csmash - not sure about how cd is handled - maybe make new module
+
+    // MS in exe with BL and 2xEP
+    {
+      spell: SPELLS.MORTAL_STRIKE,
+      condition: cnd.and(
+        cnd.hasTalent(TALENTS.BATTLELORD_TALENT),
+        cnd.debuffStacks(SPELLS.EXECUTIONERS_PRECISION_DEBUFF, { atLeast: 2 }),
+        cnd.inExecute(executeThreshold),
+        notBladestorming,
+      ),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.MORTAL_STRIKE} /> while in execute range with 2 stacks of{' '}
+          <SpellLink spell={SPELLS.EXECUTIONERS_PRECISION_DEBUFF} />
+        </>
+      ),
+    },
+
+    // OP in exe with BL, 2 charges, <90 rage
+    {
+      spell: SPELLS.OVERPOWER,
+      condition: cnd.and(
+        cnd.hasTalent(TALENTS.BATTLELORD_TALENT),
+        cnd.spellCharges(SPELLS.OVERPOWER, { atLeast: 2 }),
+        cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 900 }),
+        cnd.inExecute(executeThreshold),
+        notBladestorming,
+      ),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.OVERPOWER} /> in execute range when you have 2 charges
+          available and are below 90 rage
+        </>
+      ),
+    },
+
+    // exe in exe with 40 rage and EP
+    {
+      spell: SPELLS.EXECUTE_GLYPHED,
+      condition: cnd.and(
+        cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 400 }),
+        cnd.hasTalent(TALENTS.EXECUTIONERS_PRECISION_TALENT),
+        cnd.inExecute(executeThreshold),
+        notBladestorming,
+      ),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.EXECUTE_GLYPHED} /> while above 40 rage in execute range
+        </>
+      ),
+    },
+
+    // SkS (in exe)
+    {
+      spell: TALENTS.SKULLSPLITTER_TALENT,
+      condition: cnd.and(cnd.inExecute(executeThreshold), notBladestorming),
+      description: (
+        <>
+          Cast <SpellLink spell={TALENTS.SKULLSPLITTER_TALENT} /> in execute range
+        </>
+      ),
+    },
+
+    // OP (in exe)
+    {
+      spell: SPELLS.OVERPOWER,
+      condition: cnd.and(cnd.inExecute(executeThreshold), notBladestorming),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.OVERPOWER} /> in execute range
+        </>
+      ),
+    },
+
+    // exe in exe
+    {
+      spell: SPELLS.EXECUTE_GLYPHED,
+      condition: cnd.and(executeUsable, cnd.inExecute(executeThreshold), notBladestorming),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.EXECUTE_GLYPHED} /> in execute range
+        </>
+      ),
+    },
+
+    // MS in exe
+    {
+      spell: SPELLS.MORTAL_STRIKE,
+      condition: cnd.and(cnd.inExecute(executeThreshold), notBladestorming),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.MORTAL_STRIKE} /> in execute range
+        </>
+      ),
+    },
+
+    // MS no exe
+    {
+      spell: SPELLS.MORTAL_STRIKE,
+      condition: cnd.not(cnd.inExecute(executeThreshold)),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.MORTAL_STRIKE} />
+        </>
+      ),
+    },
+
+    // demolish no exe - make different module?
+    // {
+    //   spell: TALENTS.DEMOLISH_TALENT,
+    //   condition: cnd.not(cnd.inExecute(executeThreshold)),
+    //   description: (
+    //     <>
+    //       Cast <SpellLink spell={TALENTS.DEMOLISH_TALENT} />
+    //     </>
+    //   ),
+    // },
+
+    // SkS no exe
+    {
+      spell: TALENTS.SKULLSPLITTER_TALENT,
+      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      description: (
+        <>
+          Cast <SpellLink spell={TALENTS.SKULLSPLITTER_TALENT} />
+        </>
+      ),
+    },
+
+    // 2op no exe
+    {
+      spell: SPELLS.OVERPOWER,
+      condition: cnd.and(
+        cnd.spellCharges(SPELLS.OVERPOWER, { atLeast: 2 }),
+        cnd.not(cnd.inExecute(executeThreshold)),
+        notBladestorming,
+      ),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.OVERPOWER} /> with 2 charges available
+        </>
+      ),
+    },
+
+    // exe no exe
+    {
+      spell: SPELLS.EXECUTE_GLYPHED,
+      condition: cnd.and(executeUsable, cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.EXECUTE_GLYPHED} />
+        </>
+      ),
+    },
+
+    // OP no exe
+    {
+      spell: SPELLS.OVERPOWER,
+      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.OVERPOWER} />
+        </>
+      ),
+    },
+
+    // slam
+    {
+      spell: SPELLS.SLAM,
+      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.SLAM} />
+        </>
+      ),
+    },
+  ]);
+};
+
 export const check = (events: AnyEvent[], info: PlayerInfo): CheckResult => {
-  const executeThreshold = info.combatant.hasTalent(TALENTS.MASSACRE_SPEC_TALENT) ? 0.35 : 0.2;
-  const check = aplCheck(apl(executeThreshold));
+  const check = aplCheck(apl(info));
   return check(events, info);
 };
 

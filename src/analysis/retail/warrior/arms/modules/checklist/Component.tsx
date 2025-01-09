@@ -38,7 +38,9 @@ const ArmsWarriorChecklist = ({
           TALENTS.AVATAR_SHARED_TALENT,
           TALENTS.THUNDEROUS_ROAR_TALENT,
           SPELLS.BLADESTORM,
+          SPELLS.DEMOLISH,
         ]}
+        // TODO demolish not showing up
         description={
           <div style={{ color: 'white' }}>
             Warrior has a simple rotation. That does not mean the class is trivial to play. Small

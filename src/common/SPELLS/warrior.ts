@@ -331,6 +331,11 @@ const spells = {
     name: 'Colossus Smash',
     icon: 'ability_warrior_colossussmash',
   },
+  DEMOLISH: {
+    id: 436358,
+    name: 'Demolish',
+    icon: 'inv_ability_colossuswarrior_demolish',
+  },
   DIE_BY_THE_SWORD: {
     id: 118038,
     name: 'Die by the Sword',
