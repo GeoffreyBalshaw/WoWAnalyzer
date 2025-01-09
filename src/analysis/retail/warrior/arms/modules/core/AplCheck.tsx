@@ -293,11 +293,10 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
     },
     // demolish in exe with csmash - not sure about how cd is handled - maybe make new module
 
-    // MS in exe with BL and 2xEP
+    // MS in exe with 2xEP
     {
       spell: SPELLS.MORTAL_STRIKE,
       condition: cnd.and(
-        cnd.hasTalent(TALENTS.BATTLELORD_TALENT),
         cnd.debuffStacks(SPELLS.EXECUTIONERS_PRECISION_DEBUFF, { atLeast: 2 }),
         cnd.inExecute(executeThreshold),
         notBladestorming,
@@ -329,10 +328,11 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
     },
 
     // exe in exe with 40 rage and EP
+    // https://www.warcraftlogs.com/reports/Ft8NByGLZ64AMX2f?fight=14&type=casts&start=1522716&end=1596691&source=12&pins=0%24Separate%24%23244F4B%24resources%240%24178122636.0.0.Warrior%240.0.0.Any%24true%240.0.0.Any%24true%240%24101&ability=281000
     {
       spell: SPELLS.EXECUTE_GLYPHED,
       condition: cnd.and(
-        cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 400 }),
+        cnd.hasResource(RESOURCE_TYPES.RAGE, { atLeast: 400 }),
         cnd.hasTalent(TALENTS.EXECUTIONERS_PRECISION_TALENT),
         cnd.inExecute(executeThreshold),
         notBladestorming,
