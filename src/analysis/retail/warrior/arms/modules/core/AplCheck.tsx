@@ -25,11 +25,7 @@ const DEFAULT_EXECUTE_THRESHOLD = 0.2;
 // nezy (opp) https://www.warcraftlogs.com/reports/y9gBTjamNH84vGMZ?fight=26&type=damage-done&source=2
 // walhe (col) https://www.warcraftlogs.com/reports/Ft8NByGLZ64AMX2f?fight=14&type=summary&source=12
 
-// don't get mad about the MS procs from Unhinged
-const notBladestorming = cnd.not(cnd.buffPresent(SPELLS.BLADESTORM));
-// TODO add normalizer for ravager
-// use an EventLinkNormalizer to connect damage events to cast events
-// use a custom Normalizer to detect all damage events within Xms (3ms? 5ms?) of the ravager damage and convert the linked cast events to freecast events
+const notBladestorming = cnd.not(cnd.buffPresent(SPELLS.BLADESTORM)); // don't get mad about the MS procs from Unhinged
 
 export const apl = (info: PlayerInfo): Apl => {
   const executeThreshold = info.combatant.hasTalent(TALENTS.MASSACRE_SPEC_TALENT)
@@ -291,7 +287,6 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
         </>
       ),
     },
-    // demolish in exe with csmash - not sure about how cd is handled - maybe make new module
 
     // MS in exe with 2xEP
     {
@@ -400,17 +395,6 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
         </>
       ),
     },
-
-    // demolish no exe - make different module?
-    // {
-    //   spell: TALENTS.DEMOLISH_TALENT,
-    //   condition: cnd.not(cnd.inExecute(executeThreshold)),
-    //   description: (
-    //     <>
-    //       Cast <SpellLink spell={TALENTS.DEMOLISH_TALENT} />
-    //     </>
-    //   ),
-    // },
 
     // SkS no exe
     {

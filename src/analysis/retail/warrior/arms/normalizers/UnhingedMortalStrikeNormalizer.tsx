@@ -33,7 +33,6 @@ class UnhingedMortalStrikeNormalizer extends EventLinkNormalizer {
 
     events.forEach((event, index) => {
       if (event.type === EventType.Cast && isUnhingedMortalStrike(event)) {
-        console.log(event);
         events.splice(index, 1); // remove original cast event
         (event as AnyEvent).type = EventType.FreeCast;
         event.__modified = true;
