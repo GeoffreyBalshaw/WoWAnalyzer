@@ -49,6 +49,7 @@ import SpellReflection from '../shared/modules/talents/SpellReflection';
 import FatalMark from './modules/talents/FatalMark';
 import SkullsplitterDotNormalizer from './normalizers/SkullsplitterExpiredDots';
 import BlademastersTormentNormalizer from './modules/talents/BlademastersTorment';
+import UnhingedMortalStrikeNormalizer from './normalizers/UnhingedMortalStrikeNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -66,6 +67,7 @@ class CombatLogParser extends CoreCombatLogParser {
     improvedExecuteNormalizer: ImprovedExecuteNormalizer,
     skullsplitterDotNormalizer: SkullsplitterDotNormalizer,
     blademaastersTormetNormalizer: BlademastersTormentNormalizer,
+    unhingedMortalStrikeNormalizer: UnhingedMortalStrikeNormalizer,
 
     // WarriorCore
     abilities: Abilities,

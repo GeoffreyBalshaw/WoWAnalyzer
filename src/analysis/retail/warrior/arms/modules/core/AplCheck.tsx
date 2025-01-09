@@ -298,13 +298,15 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
       spell: SPELLS.MORTAL_STRIKE,
       condition: cnd.and(
         cnd.debuffStacks(SPELLS.EXECUTIONERS_PRECISION_DEBUFF, { atLeast: 2 }),
+        cnd.buffStacks(SPELLS.LETHAL_BLOWS_BUFF, { atLeast: 2 }),
         cnd.inExecute(executeThreshold),
         notBladestorming,
       ),
       description: (
         <>
           Cast <SpellLink spell={SPELLS.MORTAL_STRIKE} /> while in execute range with 2 stacks of{' '}
-          <SpellLink spell={SPELLS.EXECUTIONERS_PRECISION_DEBUFF} />
+          <SpellLink spell={SPELLS.EXECUTIONERS_PRECISION_DEBUFF} /> and{' '}
+          <SpellLink spell={SPELLS.LETHAL_BLOWS_BUFF} />
         </>
       ),
     },
