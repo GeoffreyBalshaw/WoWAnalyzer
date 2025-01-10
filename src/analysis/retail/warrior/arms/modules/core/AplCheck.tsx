@@ -15,8 +15,8 @@ import annotateTimeline from 'parser/shared/metrics/apl/annotate';
 import * as cnd from 'parser/shared/metrics/apl/conditions';
 
 const JUGGERNAUT_DURATION = 12000;
-const MASSACRE_EXECUTE_THRESHOLD = 0.35;
-const DEFAULT_EXECUTE_THRESHOLD = 0.2;
+export const MASSACRE_EXECUTE_THRESHOLD = 0.35;
+export const DEFAULT_EXECUTE_THRESHOLD = 0.2;
 
 // TODO add spells for non-massacre execute?
 

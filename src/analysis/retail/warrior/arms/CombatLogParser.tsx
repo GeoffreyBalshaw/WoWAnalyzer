@@ -50,6 +50,8 @@ import FatalMark from './modules/talents/FatalMark';
 import SkullsplitterDotNormalizer from './normalizers/SkullsplitterExpiredDots';
 import BlademastersTormentNormalizer from './modules/talents/BlademastersTorment';
 import UnhingedMortalStrikeNormalizer from './normalizers/UnhingedMortalStrikeNormalizer';
+import Demolish from './modules/talents/Demolish';
+import DemolishNormalizer from './normalizers/DemolishNormalizer';
 
 class CombatLogParser extends CoreCombatLogParser {
   static specModules = {
@@ -68,6 +70,7 @@ class CombatLogParser extends CoreCombatLogParser {
     skullsplitterDotNormalizer: SkullsplitterDotNormalizer,
     blademaastersTormetNormalizer: BlademastersTormentNormalizer,
     unhingedMortalStrikeNormalizer: UnhingedMortalStrikeNormalizer,
+    demolishNormalizer: DemolishNormalizer,
 
     // WarriorCore
     abilities: Abilities,
@@ -119,6 +122,7 @@ class CombatLogParser extends CoreCombatLogParser {
     fatalMark: FatalMark,
     ChampionsSpear: ChampionsSpear,
     ChampionsMight: ChampionsMight,
+    demolish: Demolish,
 
     // Debuggers
     rageCountDebugger: RageCountDebugger,
