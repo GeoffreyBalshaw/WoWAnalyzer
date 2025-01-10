@@ -1,4 +1,5 @@
 import SPELLS from 'common/SPELLS';
+import Spell from 'common/SPELLS/Spell';
 import TALENTS from 'common/TALENTS/warrior';
 import RESOURCE_TYPES from 'game/RESOURCE_TYPES';
 import SpellLink from 'interface/SpellLink';
@@ -18,14 +19,11 @@ const JUGGERNAUT_DURATION = 12000;
 export const MASSACRE_EXECUTE_THRESHOLD = 0.35;
 export const DEFAULT_EXECUTE_THRESHOLD = 0.2;
 
-// TODO add spells for non-massacre execute?
-
 // tmy https://www.warcraftlogs.com/reports/Lna7ANqKFbBWkD2Q?fight=20&type=casts&source=376
 // bris https://www.warcraftlogs.com/reports/1R9TkvMF7HLPpVdm?fight=19&type=damage-done&source=43
 // nezy (opp) https://www.warcraftlogs.com/reports/y9gBTjamNH84vGMZ?fight=26&type=damage-done&source=2
 // walhe (col) https://www.warcraftlogs.com/reports/Ft8NByGLZ64AMX2f?fight=14&type=summary&source=12
-
-const notBladestorming = cnd.not(cnd.buffPresent(SPELLS.BLADESTORM)); // don't get mad about the MS procs from Unhinged
+// pravum (col, wb, no massacre) https://www.warcraftlogs.com/reports/WTgD24mMz6wYaBL1?fight=5&type=summary&source=138
 
 export const apl = (info: PlayerInfo): Apl => {
   const executeThreshold = info.combatant.hasTalent(TALENTS.MASSACRE_SPEC_TALENT)
@@ -38,20 +36,26 @@ export const apl = (info: PlayerInfo): Apl => {
       cnd.hasResource(RESOURCE_TYPES.RAGE, { atLeast: 200 }),
     ),
   );
+  const executeSpell = info.combatant.hasTalent(TALENTS.MASSACRE_SPEC_TALENT)
+    ? SPELLS.EXECUTE_GLYPHED
+    : SPELLS.EXECUTE;
 
   return info.combatant.hasTalent(TALENTS.SLAYERS_DOMINANCE_TALENT)
-    ? buildSlayerApl(executeThreshold, executeUsable)
-    : buildColossusApl(executeThreshold, executeUsable);
+    ? buildSlayerApl(executeThreshold, executeUsable, executeSpell)
+    : buildColossusApl(executeThreshold, executeUsable, executeSpell);
 };
 
-export const buildSlayerApl = (executeThreshold: number, executeUsable: Condition<any>): Apl => {
+export const buildSlayerApl = (
+  executeThreshold: number,
+  executeUsable: Condition<any>,
+  executeSpell: Spell,
+): Apl => {
   return build([
     // Exe with 3x MFE, 2x SD, refresh Jugg
     {
-      spell: SPELLS.EXECUTE_GLYPHED,
+      spell: executeSpell,
       condition: cnd.and(
         executeUsable,
-        notBladestorming,
         cnd.or(
           cnd.debuffStacks(SPELLS.MARKED_FOR_EXECUTION, { atLeast: 3, atMost: 3 }),
           cnd.buffStacks(SPELLS.SUDDEN_DEATH_ARMS_TALENT_BUFF, { atLeast: 2, atMost: 2 }),
@@ -60,8 +64,7 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
       ),
       description: (
         <>
-          Cast <SpellLink spell={SPELLS.EXECUTE_GLYPHED} /> when any of the following conditions are
-          met:
+          Cast <SpellLink spell={executeSpell} /> when any of the following conditions are met:
           <ul>
             <li>
               Your target has 3 stacks of <SpellLink spell={SPELLS.MARKED_FOR_EXECUTION} />
@@ -84,7 +87,6 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
         cnd.and(
           cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 850 }), // rage is logged 10x higher than the player's "real" value
           cnd.inExecute(executeThreshold),
-          notBladestorming,
         ),
       ),
       description: (
@@ -103,7 +105,6 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
         cnd.debuffStacks(SPELLS.EXECUTIONERS_PRECISION_DEBUFF, { atLeast: 2 }),
         cnd.buffStacks(SPELLS.LETHAL_BLOWS_BUFF, { atLeast: 1 }),
         cnd.inExecute(executeThreshold),
-        notBladestorming,
       ),
       description: (
         <>
@@ -122,7 +123,6 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
         cnd.buffStacks(TALENTS.OVERPOWER_TALENT, { atMost: 1 }), // Martial Prowess buff
         cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 800 }),
         cnd.inExecute(executeThreshold),
-        notBladestorming,
       ),
       description: (
         <>
@@ -150,7 +150,6 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
         cnd.buffStacks(TALENTS.OVERPOWER_TALENT, { atMost: 1 }), // Martial Prowess buff
         cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 400 }),
         cnd.inExecute(executeThreshold),
-        notBladestorming,
       ),
       description: (
         <>
@@ -169,11 +168,11 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
 
     // Exe in execute
     {
-      spell: SPELLS.EXECUTE_GLYPHED,
-      condition: cnd.and(executeUsable, cnd.inExecute(executeThreshold), notBladestorming),
+      spell: executeSpell,
+      condition: cnd.and(executeUsable, cnd.inExecute(executeThreshold)),
       description: (
         <>
-          Cast <SpellLink spell={SPELLS.EXECUTE_GLYPHED} /> while in execute range
+          Cast <SpellLink spell={executeSpell} /> while in execute range
         </>
       ),
     },
@@ -184,7 +183,6 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
       condition: cnd.and(
         cnd.hasTalent(TALENTS.FIERCE_FOLLOWTHROUGH_TALENT),
         cnd.spellCharges(SPELLS.OVERPOWER, { atLeast: 2 }),
-        notBladestorming,
         cnd.not(cnd.inExecute(executeThreshold)),
       ),
       description: (
@@ -199,7 +197,6 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
       spell: SPELLS.OVERPOWER,
       condition: cnd.and(
         cnd.buffPresent(SPELLS.OPPORTUNIST),
-        notBladestorming,
         cnd.not(cnd.inExecute(executeThreshold)),
       ),
       description: (
@@ -224,7 +221,7 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
     // SkS outside execute
     {
       spell: TALENTS.SKULLSPLITTER_TALENT,
-      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      condition: cnd.not(cnd.inExecute(executeThreshold)),
       description: (
         <>
           Cast <SpellLink spell={TALENTS.SKULLSPLITTER_TALENT} /> while outside execute range
@@ -234,11 +231,11 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
 
     // filler execute
     {
-      spell: SPELLS.EXECUTE_GLYPHED,
-      condition: cnd.and(executeUsable, cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      spell: executeSpell,
+      condition: cnd.and(executeUsable, cnd.not(cnd.inExecute(executeThreshold))),
       description: (
         <>
-          Cast <SpellLink spell={SPELLS.EXECUTE_GLYPHED} />
+          Cast <SpellLink spell={executeSpell} />
         </>
       ),
     },
@@ -246,7 +243,7 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
     // OP
     {
       spell: SPELLS.OVERPOWER,
-      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold))),
       description: (
         <>
           Cast <SpellLink spell={SPELLS.OVERPOWER} />
@@ -257,7 +254,7 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
     // Slam
     {
       spell: SPELLS.SLAM,
-      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold))),
       description: (
         <>
           Cast <SpellLink spell={SPELLS.SLAM} />
@@ -267,7 +264,11 @@ export const buildSlayerApl = (executeThreshold: number, executeUsable: Conditio
   ]);
 };
 
-export const buildColossusApl = (executeThreshold: number, executeUsable: Condition<any>): Apl => {
+export const buildColossusApl = (
+  executeThreshold: number,
+  executeUsable: Condition<any>,
+  executeSpell: Spell,
+): Apl => {
   return build([
     // SkS in exe below 85
     {
@@ -276,7 +277,6 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
         cnd.and(
           cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 850 }), // rage is logged 10x higher than the player's "real" value
           cnd.inExecute(executeThreshold),
-          notBladestorming,
         ),
       ),
       description: (
@@ -288,20 +288,35 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
       ),
     },
 
-    // MS in exe with 2xEP
+    // MS in exe with 2xEP 2xLB (no battlelord)
     {
       spell: SPELLS.MORTAL_STRIKE,
       condition: cnd.and(
         cnd.debuffStacks(SPELLS.EXECUTIONERS_PRECISION_DEBUFF, { atLeast: 2 }),
         cnd.buffStacks(SPELLS.LETHAL_BLOWS_BUFF, { atLeast: 2 }),
         cnd.inExecute(executeThreshold),
-        notBladestorming,
       ),
       description: (
         <>
           Cast <SpellLink spell={SPELLS.MORTAL_STRIKE} /> while in execute range with 2 stacks of{' '}
           <SpellLink spell={SPELLS.EXECUTIONERS_PRECISION_DEBUFF} /> and{' '}
           <SpellLink spell={SPELLS.LETHAL_BLOWS_BUFF} />
+        </>
+      ),
+    },
+
+    // MS in exe with 2xEP (battlelord)
+    {
+      spell: SPELLS.MORTAL_STRIKE,
+      condition: cnd.and(
+        cnd.debuffStacks(SPELLS.EXECUTIONERS_PRECISION_DEBUFF, { atLeast: 2 }),
+        cnd.hasTalent(TALENTS.BATTLELORD_TALENT),
+        cnd.inExecute(executeThreshold),
+      ),
+      description: (
+        <>
+          Cast <SpellLink spell={SPELLS.MORTAL_STRIKE} /> while in execute range with 2 stacks of{' '}
+          <SpellLink spell={SPELLS.EXECUTIONERS_PRECISION_DEBUFF} />
         </>
       ),
     },
@@ -314,7 +329,6 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
         cnd.spellCharges(SPELLS.OVERPOWER, { atLeast: 2 }),
         cnd.hasResource(RESOURCE_TYPES.RAGE, { atMost: 900 }),
         cnd.inExecute(executeThreshold),
-        notBladestorming,
       ),
       description: (
         <>
@@ -325,18 +339,16 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
     },
 
     // exe in exe with 40 rage and EP
-    // https://www.warcraftlogs.com/reports/Ft8NByGLZ64AMX2f?fight=14&type=casts&start=1522716&end=1596691&source=12&pins=0%24Separate%24%23244F4B%24resources%240%24178122636.0.0.Warrior%240.0.0.Any%24true%240.0.0.Any%24true%240%24101&ability=281000
     {
-      spell: SPELLS.EXECUTE_GLYPHED,
+      spell: executeSpell,
       condition: cnd.and(
         cnd.hasResource(RESOURCE_TYPES.RAGE, { atLeast: 400 }),
         cnd.hasTalent(TALENTS.EXECUTIONERS_PRECISION_TALENT),
         cnd.inExecute(executeThreshold),
-        notBladestorming,
       ),
       description: (
         <>
-          Cast <SpellLink spell={SPELLS.EXECUTE_GLYPHED} /> while above 40 rage in execute range
+          Cast <SpellLink spell={executeSpell} /> while above 40 rage in execute range
         </>
       ),
     },
@@ -344,7 +356,7 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
     // SkS (in exe)
     {
       spell: TALENTS.SKULLSPLITTER_TALENT,
-      condition: cnd.and(cnd.inExecute(executeThreshold), notBladestorming),
+      condition: cnd.inExecute(executeThreshold),
       description: (
         <>
           Cast <SpellLink spell={TALENTS.SKULLSPLITTER_TALENT} /> in execute range
@@ -355,7 +367,7 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
     // OP (in exe)
     {
       spell: SPELLS.OVERPOWER,
-      condition: cnd.and(cnd.inExecute(executeThreshold), notBladestorming),
+      condition: cnd.inExecute(executeThreshold),
       description: (
         <>
           Cast <SpellLink spell={SPELLS.OVERPOWER} /> in execute range
@@ -365,11 +377,11 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
 
     // exe in exe
     {
-      spell: SPELLS.EXECUTE_GLYPHED,
-      condition: cnd.and(executeUsable, cnd.inExecute(executeThreshold), notBladestorming),
+      spell: executeSpell,
+      condition: cnd.and(executeUsable, cnd.inExecute(executeThreshold)),
       description: (
         <>
-          Cast <SpellLink spell={SPELLS.EXECUTE_GLYPHED} /> in execute range
+          Cast <SpellLink spell={executeSpell} /> in execute range
         </>
       ),
     },
@@ -377,7 +389,7 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
     // MS in exe
     {
       spell: SPELLS.MORTAL_STRIKE,
-      condition: cnd.and(cnd.inExecute(executeThreshold), notBladestorming),
+      condition: cnd.inExecute(executeThreshold),
       description: (
         <>
           Cast <SpellLink spell={SPELLS.MORTAL_STRIKE} /> in execute range
@@ -399,7 +411,7 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
     // SkS no exe
     {
       spell: TALENTS.SKULLSPLITTER_TALENT,
-      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      condition: cnd.not(cnd.inExecute(executeThreshold)),
       description: (
         <>
           Cast <SpellLink spell={TALENTS.SKULLSPLITTER_TALENT} />
@@ -413,7 +425,6 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
       condition: cnd.and(
         cnd.spellCharges(SPELLS.OVERPOWER, { atLeast: 2 }),
         cnd.not(cnd.inExecute(executeThreshold)),
-        notBladestorming,
       ),
       description: (
         <>
@@ -424,11 +435,11 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
 
     // exe no exe
     {
-      spell: SPELLS.EXECUTE_GLYPHED,
-      condition: cnd.and(executeUsable, cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      spell: executeSpell,
+      condition: cnd.and(executeUsable, cnd.not(cnd.inExecute(executeThreshold))),
       description: (
         <>
-          Cast <SpellLink spell={SPELLS.EXECUTE_GLYPHED} />
+          Cast <SpellLink spell={executeSpell} />
         </>
       ),
     },
@@ -436,7 +447,7 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
     // OP no exe
     {
       spell: SPELLS.OVERPOWER,
-      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold))),
       description: (
         <>
           Cast <SpellLink spell={SPELLS.OVERPOWER} />
@@ -447,7 +458,7 @@ export const buildColossusApl = (executeThreshold: number, executeUsable: Condit
     // slam
     {
       spell: SPELLS.SLAM,
-      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold)), notBladestorming),
+      condition: cnd.and(cnd.not(cnd.inExecute(executeThreshold))),
       description: (
         <>
           Cast <SpellLink spell={SPELLS.SLAM} />

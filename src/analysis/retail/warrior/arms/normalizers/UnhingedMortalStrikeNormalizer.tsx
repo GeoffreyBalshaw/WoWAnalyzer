@@ -4,7 +4,8 @@ import { AnyEvent, CastEvent, EventType, GetRelatedEvents } from 'parser/core/Ev
 import { Options } from 'parser/core/Module';
 
 const UNHINGED_MORTAL_STRIKE = 'Unhinged-Mortal-Strike';
-const DAMAGE_BUFFER_MS = 5; // triggered MS *should* be at the exact same timestamp, but give some wiggle room
+const RAVAGER_DAMAGE_BUFFER_MS = 5; // triggered MS *should* be at the exact same timestamp, but give some wiggle room
+const BLADESTORM_DAMAGE_BUFFER_MS = 100; // mortal strike cast is anywhere from ~5-100ms before the bladestorm damage tick
 
 const EVENT_LINKS: EventLink[] = [
   {
@@ -13,8 +14,18 @@ const EVENT_LINKS: EventLink[] = [
     linkingEventType: EventType.Cast,
     referencedEventId: SPELLS.RAVAGER_DAMAGE.id,
     referencedEventType: EventType.Damage,
-    forwardBufferMs: DAMAGE_BUFFER_MS,
-    backwardBufferMs: DAMAGE_BUFFER_MS,
+    forwardBufferMs: RAVAGER_DAMAGE_BUFFER_MS,
+    backwardBufferMs: RAVAGER_DAMAGE_BUFFER_MS,
+    anyTarget: true,
+  },
+  {
+    linkRelation: UNHINGED_MORTAL_STRIKE,
+    linkingEventId: SPELLS.MORTAL_STRIKE.id,
+    linkingEventType: EventType.Cast,
+    referencedEventId: SPELLS.BLADESTORM_DAMAGE.id,
+    referencedEventType: EventType.Damage,
+    forwardBufferMs: BLADESTORM_DAMAGE_BUFFER_MS,
+    backwardBufferMs: BLADESTORM_DAMAGE_BUFFER_MS,
     anyTarget: true,
   },
 ];
