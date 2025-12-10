@@ -13,22 +13,27 @@ import SpellLink from 'interface/SpellLink';
 import CooldownGraphSubsection, {
   Cooldown,
 } from 'interface/guide/components/CooldownGraphSubSection';
+import SPELLS from 'common/SPELLS';
+import CooldownUsage from 'parser/core/MajorCooldowns/CooldownUsage';
+import { FoundationDowntimeSection } from 'interface/guide/foundation/FoundationDowntimeSection';
 
 export default function Guide({ modules, events, info }: GuideProps<typeof CombatLogParser>) {
   return (
     <>
-      <ResourceUsageSection modules={modules} events={events} info={info} />
-      <CooldownSection />
+      <CoreSection modules={modules} events={events} info={info} />
+      <CooldownSection modules={modules} events={events} info={info} />
       <PreparationSection />
     </>
   );
 }
 
+export const GUIDE_CORE_EXPLANATION_PERCENT = 40;
+
 const PERFECT_HOLY_POWER_CAP = 0.1;
 const GOOD_HOLY_POWER_CAP = 0.15;
 const OK_HOLY_POWER_CAP = 0.2;
 
-function ResourceUsageSection({ modules, info }: GuideProps<typeof CombatLogParser>) {
+function CoreSection({ modules, info }: GuideProps<typeof CombatLogParser>) {
   const holyPowerWasted = modules.holyPowerTracker.wasted;
   const holyPowerTotal = modules.holyPowerTracker.wasted + modules.holyPowerTracker.generated;
   const wastedHolyPowerPercentage = holyPowerWasted / holyPowerTotal;
@@ -42,7 +47,20 @@ function ResourceUsageSection({ modules, info }: GuideProps<typeof CombatLogPars
   }
 
   return (
-    <Section title="Resource Use">
+    <Section title="Core">
+      <FoundationDowntimeSection />
+      <h4>
+        <strong>Explanation</strong>
+      </h4>
+      <p>
+        Although Retribution is a spec with some natural downtime, it needs to be auto-attacking as
+        much as possible because of talents like{' '}
+        <SpellLink spell={TALENTS.CRUSADING_STRIKES_TALENT} /> and{' '}
+        <SpellLink spell={TALENTS.ART_OF_WAR_TALENT} />. Failing to maintain good melee uptime will
+        likely result in a lower ability uptime because of lower{' '}
+        <ResourceLink id={RESOURCE_TYPES.HOLY_POWER.id} /> generation.
+      </p>
+
       <SubSection title="Holy Power">
         <p>
           Most of your rotational abilities either <strong>build</strong> or <strong>spend</strong>{' '}
@@ -97,6 +115,9 @@ function ResourceUsageSection({ modules, info }: GuideProps<typeof CombatLogPars
           </RoundedPanel>
         </SideBySidePanels>
       </SubSection>
+      {info.combatant.hasTalent(TALENTS.HOLY_FLAMES_TALENT) && (
+        <SubSection title="Buffs and debuffs">{modules.expurgation.guideSubsection}</SubSection>
+      )}
     </Section>
   );
 }
@@ -119,11 +140,15 @@ const cooldowns: Cooldown[] = [
     isActive: (c) => c.hasTalent(TALENTS.DIVINE_TOLL_TALENT),
   },
   {
+    spell: SPELLS.DIVINE_HAMMER_CAST,
+    isActive: (c) => c.hasTalent(TALENTS.DIVINE_HAMMER_TALENT),
+  },
+  {
     spell: DRAGONFLIGHT_OTHERS_SPELLS.RAGE_OF_FYRALATH_1,
     isActive: (c) => c.hasMainHand(DRAGONFLIGHT_OTHERS_ITEMS.FYRALATH.id),
   },
 ];
-function CooldownSection() {
+function CooldownSection({ modules, info }: GuideProps<typeof CombatLogParser>) {
   return (
     <Section title="Cooldowns">
       <p>
@@ -132,6 +157,9 @@ function CooldownSection() {
         cooldown as soon as it becomes available (as long as it can do damage on target).
       </p>
       <CooldownGraphSubsection cooldowns={cooldowns} />
+      {info.combatant.hasTalent(TALENTS.RADIANT_GLORY_TALENT) && (
+        <CooldownUsage analyzer={modules.wakeofAshes} title="Wake of Ashes" />
+      )}
     </Section>
   );
 }

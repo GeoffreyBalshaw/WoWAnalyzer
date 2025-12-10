@@ -14,6 +14,7 @@ import { maybeGetTalentOrSpell } from 'common/maybeGetTalentOrSpell';
 import Entity from './Entity';
 import { PlayerInfo } from './Player';
 import { Talent } from 'common/TALENTS/types';
+import { IGNORED } from 'common/TALENTS/IGNORED';
 
 export interface CombatantInfo extends CombatantInfoEvent {
   name: string;
@@ -128,6 +129,10 @@ class Combatant extends Entity {
     });
   }
 
+  get talentTree(): TalentEntry[] {
+    return this._combatantInfo.talentTree.filter((it) => !IGNORED.includes(it.id));
+  }
+
   hasClassicTalent(spell: number | { id: number }): boolean {
     const id = typeof spell === 'number' ? spell : spell.id;
     return this._classicTalentPoints.has(id);
@@ -179,6 +184,19 @@ class Combatant extends Entity {
     } else {
       return [];
     }
+  }
+
+  private glyphIds?: Set<number>;
+
+  private _importGlyphs(event: CombatantInfoEvent) {
+    if (this.glyphIds === undefined && event.customPowerSet) {
+      this.glyphIds = new Set(event.customPowerSet.map((power) => power.traitID));
+    }
+  }
+
+  hasGlyph(id: number): boolean {
+    this._importGlyphs(this._combatantInfo);
+    return this.glyphIds?.has(id) ?? false;
   }
 
   // endregion

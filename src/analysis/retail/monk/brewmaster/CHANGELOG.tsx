@@ -6,6 +6,12 @@ import SpellLink from 'interface/SpellLink';
 
 // prettier-ignore
 export default [
+  change(date(2025, 9, 21), <>Correct handling of pre-pull <SpellLink spell={talents.CHI_BURST_SHARED_TALENT} /> in rotation checker.</>, emallson),
+  change(date(2025, 9, 21), <>Add support for <SpellLink spell={talents.IRONSHELL_BREW_TALENT} /> and <SpellLink spell={talents.CELESTIAL_INFUSION_TALENT} /> to major defensive analysis.</>, emallson),
+  change(date(2025, 9, 12), <>Fix purify rate on <SpellLink spell={talents.QUICK_SIP_TALENT} />.</>, emallson),
+  change(date(2025, 9, 11), <>Fix cooldown reduction effects not applying to <SpellLink spell={talents.CELESTIAL_INFUSION_TALENT} />.</>, emallson),
+  change(date(2025, 8, 21), <>Update priority of <SpellLink spell={talents.KEG_SMASH_TALENT} /> in breathless builds.</>, emallson),
+  change(date(2025, 8, 17), <>Support <SpellLink spell={talents.CELESTIAL_INFUSION_TALENT} /> in <SpellLink spell={talents.ASPECT_OF_HARMONY_TALENT} /> analysis. Minor rotation updates.</>, emallson),
   change(date(2025, 8, 9), <>Add basic support for <SpellLink spell={talents.CELESTIAL_INFUSION_TALENT} /> and the revamped <SpellLink spell={talents.INVOKE_NIUZAO_THE_BLACK_OX_TALENT} /></>, emallson),
   change(date(2025, 7, 12), <>Fix Purifying Brew section when literally no Purifies are used.</>, emallson),
   change(date(2025, 6, 8), <>Add preparation section to overview.</>, Vetyst),

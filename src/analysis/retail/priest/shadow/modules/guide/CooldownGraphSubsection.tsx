@@ -110,6 +110,14 @@ const CoreCooldownsGraph = () => {
         <SpellLink spell={SPELLS.MIND_BLAST} />
       </strong>{' '}
       is a core spell that should be keept on cooldown as much as possible.
+      {info!.combatant.hasTalent(TALENTS.POWER_SURGE_TALENT) && (
+        <>
+          {' '}
+          High priority spells like <SpellLink spell={SPELLS.VOID_BOLT} />,{' '}
+          <SpellLink spell={TALENTS.DEVOURING_PLAGUE_TALENT} />, or{' '}
+          <SpellLink spell={SPELLS.MIND_FLAY_INSANITY_TALENT_DAMAGE} /> should be used before this.
+        </>
+      )}
       <br />
       {/*
       <strong>
@@ -223,7 +231,14 @@ const ShortCooldownsGraph = () => {
           </strong>{' '}
           is a channeled spell that should be used as often as possible with{' '}
           <SpellLink spell={TALENTS.DEVOURING_PLAGUE_TALENT} /> on its target. It should be
-          channeled for its full duration.
+          channeled for its full duration
+          {info!.combatant.hasTalent(TALENTS.VOID_ERUPTION_TALENT) && (
+            <>
+              {' '}
+              except to cast <SpellLink spell={SPELLS.VOID_BOLT} />
+            </>
+          )}
+          .
           <br />
         </>
       )}

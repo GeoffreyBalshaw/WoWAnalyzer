@@ -44,6 +44,17 @@ import SpellLink from 'interface/SpellLink';
 
 // prettier-ignore
 export default [
+  change(date(2025, 11, 5), 'Add new Classic mega-servers to character/guild search', emallson),
+  change(date(2025, 10,  14), 'Replace Babel with oxc and swc.', ToppleTheNun),
+  change(date(2025, 10, 1), <>Fix crash in Protectors of the Endless analysis if the Foundation timeline is shown. Also fix a zoom bug on the phase header.</>, emallson),
+  change(date(2025, 9, 25), <>Add <SpellLink spell={SPELLS.PHASE_BLINK.id} /> to the ignored spells.</>, Arlie),
+  change(date(2025, 9, 14), 'MoP update for Classic Engineering Item, Spell, and Enchant IDs', jazminite),
+  change(date(2025, 9, 12), 'Add background images and timeline abilities for Terrace of Endless Spring', emallson),
+  change(date(2025, 9, 5), 'Add page to show analysis errors across all supported specs.', emallson),
+  change(date(2025, 8, 25), 'Add option to disable movement warnings on timeline tab.', ToppleTheNun),
+  change(date(2025, 8, 14), <>Updated <ItemLink id={ITEMS.SAD_SOCKET_ADDING_DEVICE.id} /> to <ItemLink id={ITEMS.TECHNOMANCERS_GIFT.id} /> for Head, Belt, and Bracer socket addition</>, Ceric),
+  change(date(2025, 8, 11), 'Start hiding Hero Specialization talent node on character page.', ToppleTheNun),
+  change(date(2025, 8, 10), 'Update to patch 11.2', KYZ),
   change(date(2025, 8, 9), 'Fix handling of sockets in D.I.S.C. belt.', emallson),
   change(date(2025, 8, 9), 'Remove Corruption helm enchants from recommendations in 11.2', emallson),
   change(date(2025, 7, 29), 'Add timeline abilities for Mogu\'shan Vaults bosses', emallson),

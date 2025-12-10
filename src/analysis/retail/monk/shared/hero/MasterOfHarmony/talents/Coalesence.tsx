@@ -13,6 +13,7 @@ import STATISTIC_ORDER from 'parser/ui/STATISTIC_ORDER';
 import TalentSpellText from 'parser/ui/TalentSpellText';
 import ItemHealingDone from 'parser/ui/ItemHealingDone';
 import ItemDamageDone from 'parser/ui/ItemDamageDone';
+import { ABILITIES_AFFECTED_BY_HEALING_INCREASES } from 'analysis/retail/monk/mistweaver/constants';
 
 class Coalesence extends Analyzer {
   static dependencies = {
@@ -36,6 +37,11 @@ class Coalesence extends Analyzer {
     if (event.ability.guid === SPELLS.ASPECT_OF_HARMONY_HOT.id) {
       return;
     }
+
+    if (!ABILITIES_AFFECTED_BY_HEALING_INCREASES.includes(event.ability.guid)) {
+      return;
+    }
+
     const target = this.combatants.getEntity(event);
     if (
       !target ||

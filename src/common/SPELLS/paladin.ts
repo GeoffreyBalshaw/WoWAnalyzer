@@ -120,6 +120,12 @@ const spells = {
     icon: 'spell_holy_divineprotection',
     manaCost: 17500,
   },
+  DIVINE_PROTECTION_RET: {
+    id: 403876,
+    name: 'Divine Protection',
+    icon: 'spell_holy_divineprotection',
+    manaCost: 17500,
+  },
   HOLY_LIGHT: {
     id: 82326,
     name: 'Holy Light',
@@ -358,6 +364,21 @@ const spells = {
   },
 
   // Retribution Paladin:
+  AVENGING_WRATH_BUFF: {
+    id: 454351,
+    name: 'Avenging Wrath',
+    icon: 'spell_holy_avenginewrath',
+  },
+  INSTRUMENT_OF_RETRIBUTION: {
+    id: 404752,
+    name: 'Instrument of Retribution',
+    icon: 'spell_holy_crusade',
+  },
+  EXECUTION_SENTENCE_DAMAGE: {
+    id: 387113,
+    name: 'Execution Sentence',
+    icon: 'spell_paladin_executionsentence',
+  },
   CRUSADE: {
     id: 454373,
     name: 'Crusade',
@@ -369,7 +390,7 @@ const spells = {
     icon: 'classicon_paladin',
   },
   DIVINE_HAMMER_CAST: {
-    id: 1236942,
+    id: 198034,
     name: 'Divine Hammer',
     icon: 'classicon_paladin',
   },
@@ -377,6 +398,11 @@ const spells = {
     id: 197277,
     name: 'Judgment',
     icon: 'spell_holy_righteousfury',
+  },
+  EXPURGATION_DEBUFF: {
+    id: 383346,
+    name: 'Expurgation',
+    icon: 'ability_paladin_bladeofjustice',
   },
   GREATER_JUDGMENT_HEAL_HOLY: {
     id: 414019,
@@ -456,12 +482,12 @@ const spells = {
   CRUSADING_STRIKES_ENERGIZE: {
     id: 406834,
     name: 'Crusading Strikes',
-    icon: 'inv_sword_2h_artifactashbringer_d_01',
+    icon: 'inv_sword_08',
   },
   CRUSADING_STRIKES: {
     id: 408385,
     name: 'Crusading Strikes',
-    icon: 'spell_holy_crusaderstrike.jpg',
+    icon: 'inv_sword_08',
   },
   VANGUARDS_MOMENTUM: {
     id: 403081,
@@ -616,7 +642,7 @@ const spells = {
     id: 427453,
     name: 'Hammer of Light',
     icon: 'inv_mace_1h_gryphonrider_d_02_silver.jpg',
-    holyPowerCost: 3,
+    holyPowerCost: 5,
   },
   LIGHTS_DELIVERANCE_FREE_CAST_BUFF: {
     ...talents.LIGHTS_DELIVERANCE_TALENT,

@@ -1,4 +1,4 @@
-import { GuideProps, Section, SubSection } from 'interface/guide';
+import { GuideProps, Section } from 'interface/guide';
 import TALENTS from 'common/TALENTS/priest';
 //import { TIERS } from 'game/TIERS';
 import CombatLogParser from './CombatLogParser';
@@ -32,6 +32,8 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
             modules.insidiousIre.guideSubsection}
           {info.combatant.hasTalent(TALENTS.VOID_TORRENT_TALENT) &&
             modules.voidTorrent.guideSubsection}
+          {info.combatant.hasTalent(TALENTS.VOID_VOLLEY_TALENT) &&
+            modules.voidVolley.guideSubsection}
           {info.combatant.hasTalent(TALENTS.VOID_BLAST_TALENT) && modules.voidBlast.guideSubsection}
           {info.combatant.hasTalent(TALENTS.COLLAPSING_VOID_TALENT) &&
             modules.entropicRift.guideSubsectionCollapsingVoid}
@@ -44,8 +46,6 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
         </Section>
         <Section title="Major Cooldowns">
           <CooldownGraphSubsection.LongCooldownsGraph />
-          {/*TODO*/}
-          {/*info.combatant.hasTalent(TALENTS.POWER_SURGE_TALENT) && modules.halo.guideSubsection*/}
           {info.combatant.hasTalent(TALENTS.VOID_ERUPTION_TALENT) &&
             modules.voidform.guideSubsection}
           {info.combatant.hasTalent(TALENTS.INESCAPABLE_TORMENT_TALENT) &&
@@ -58,21 +58,13 @@ export default function Guide({ modules, events, info }: GuideProps<typeof Comba
           modules.shadowyInsight.guideSubsection}
         {info.combatant.hasTalent(TALENTS.MIND_DEVOURER_TALENT) &&
           modules.mindDevourer.guideSubsection}
-
         {info.combatant.hasTalent(TALENTS.SURGE_OF_INSANITY_TALENT) &&
-          modules.mindFlayInsanity.guideSubsection}
-
-        {info.combatant.hasTalent(TALENTS.DEATHSPEAKER_TALENT) &&
-          modules.deathspeaker.guideSubsection}
+          modules.surgeOfInsanity.guideSubsection}
       </Section>
 
       {/* TODO:
-      <Section title="Hero Talent?"></>
+      <Section title="Action Priority List"></>
       */}
-
-      <Section title="Action Priority List">
-        <SubSection>Coming Soon!</SubSection>
-      </Section>
 
       <PreparationSection />
     </>
